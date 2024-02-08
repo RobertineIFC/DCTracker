@@ -6,6 +6,7 @@ body {
 #map {
     background-color: #0d0232;
     height: 100vh;
+    width: 100vh;
 }
 
 
