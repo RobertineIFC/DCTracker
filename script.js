@@ -409,4 +409,5 @@ document.addEventListener('DOMContentLoaded', function () {
   mymap.on('click', clearRouteOnMapClick);
 
   fetchFlights();
+  setInterval(fetchFlights, 15000);
 });
