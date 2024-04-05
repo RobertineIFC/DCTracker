@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function displayRoutePolyline(route) {
     const coordinates = route.map(point => [point.latitude, point.longitude]);
-    routePolyline = L.polyline(coordinates, { color: 'red' }).addTo(mymap);
+    routePolyline = L.polyline(coordinates, { color: 'blue' }).addTo(mymap);
   }
 
 
