@@ -54,6 +54,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let flightMarkers = [];
   let routePolyline;
+  let segmentPolyline; // Declare segmentPolyline globally
+
+
+
 
 
 
@@ -63,32 +67,34 @@ document.addEventListener('DOMContentLoaded', function () {
   async function onMarkerClick(e) {
     const flightId = e.target.flightId;
 
-
     removeExistingPolyline();
     removeFlightInfoPopup();
 
     const route = await fetchFlightRoute(flightId);
 
-
     showFlightInfoPopup(e.latlng, e.target.flightInfo);
 
     if (route) {
-      displayRoutePolyline(route);
+        displayRoutePolyline(route, e.latlng); // Pass clicked marker's latlng to displayRoutePolyline
     }
-  }
+}
 
 
 
 
 
-
-
-  function removeExistingPolyline() {
+  async function removeExistingPolyline() {
     if (routePolyline) {
-      mymap.removeLayer(routePolyline);
-      routePolyline = null;
+        mymap.removeLayer(routePolyline);
+        routePolyline = null;
     }
-  }
+    if (segmentPolyline) {
+        mymap.removeLayer(segmentPolyline);
+        segmentPolyline = null;
+    }
+}
+
+
 
 
 
@@ -183,10 +189,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-  function displayRoutePolyline(route) {
+  function displayRoutePolyline(route, clickedMarkerLatLng) {
     const coordinates = route.map(point => [point.latitude, point.longitude]);
-    routePolyline = L.polyline(coordinates, { color: 'blue' }).addTo(mymap);
+
+    if (routePolyline) {
+        mymap.removeLayer(routePolyline);
+    }
+
+
+    const lastPointIndex = coordinates.length - 1;
+    const routeCoordinates = coordinates.slice(0, lastPointIndex + 1);
+
+    routePolyline = L.polyline(routeCoordinates, { color: 'blue' }).addTo(mymap);
+
+    const extendedCoordinates = [coordinates[lastPointIndex], [clickedMarkerLatLng.lat, clickedMarkerLatLng.lng]];
+    segmentPolyline = L.polyline(extendedCoordinates, { color: 'blue' }).addTo(mymap);
   }
+
+
+
+
 
 
 
@@ -342,16 +364,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   function addFlightMarkers(flights) {
-    // Tout enlever dans le popup et le polyline
+    const openPopup = mymap._popup;
+
+    // Remove existing markers and reset flightMarkers array
     flightMarkers.forEach(marker => marker.remove());
     flightMarkers = [];
-    removeExistingPolyline();
-    removeFlightInfoPopup();
 
     flights.forEach(flight => {
-      createFlightMarker(flight);
+        createFlightMarker(flight);
     });
+
+    // If there was an open popup, reopen it
+    if (openPopup) {
+        openPopup.openOn(mymap);
+    }
   }
+
 
 
 
@@ -402,7 +430,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
   document.getElementById('changeMapBtn').addEventListener('click', changeMapStyle);
-  document.getElementById('refreshButton').addEventListener('click', fetchFlights);
+  setInterval(fetchFlights, 5000);
+  setInterval(displayRoutePolyline, 5000);
 
   geocoder.on('markgeocode', zoomToLocation);
 
