@@ -277,10 +277,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentMapStyle = getCurrentMapStyle();
 
     // Changer d'icone quand on est en vue satellite sinon on ne voit pas les icones bleus, c'est dommage :/
-    if (currentMapStyle === 'satellite') {
-      return "static/orangeplane.png";
-    } else {
+    if (currentMapStyle === 'osm') {
       return "static/plane.png";
+    } else {
+      return "static/orangeplane.png";
     }
   }
 
