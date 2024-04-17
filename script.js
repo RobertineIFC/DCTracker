@@ -24,29 +24,15 @@ document.addEventListener('DOMContentLoaded', function () {
     maxBoundsViscosity: 0.85
   });
 
-
-
-
-
-
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     noWrap: true
   }).addTo(mymap);
 
-
-
-
-
-
-
   const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
   const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
   const buttonImage = document.getElementById("changeMapBtn");
   buttonImage.querySelector('img').src = "static/sat.png";
-
-
-
 
   const geocoder = L.Control.geocoder({
     defaultMarkGeocode: false,
@@ -55,33 +41,16 @@ document.addEventListener('DOMContentLoaded', function () {
   let flightMarkers = [];
   let routePolyline;
 
-
-
-
-
-
   async function onMarkerClick(e) {
     const flightId = e.target.flightId;
-
-
     removeExistingPolyline();
     removeFlightInfoPopup();
-
     const route = await fetchFlightRoute(flightId);
-
-
     showFlightInfoPopup(e.latlng, e.target.flightInfo);
-
     if (route) {
       displayRoutePolyline(route);
     }
   }
-
-
-
-
-
-
 
   function removeExistingPolyline() {
     if (routePolyline) {
@@ -90,42 +59,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
   function removeFlightInfoPopup() {
     mymap.closePopup();
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   async function fetchFlightRoute(flightId) {
     const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
     const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
     const routeApiUrl = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/route?apikey=${apiKey}`;
-
     try {
       const response = await fetch(routeApiUrl);
       const data = await response.json();
-
       if (data.errorCode === 0) {
         return data.result;
       } else {
@@ -138,67 +82,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   function showFlightInfoPopup(latlng, flightInfo) {
     const { username, callsign, altitude, speed } = flightInfo;
     const roundedAltitude = Math.round(altitude);
     const roundedSpeed = Math.round(speed);
-
     const popupContent = `
       <b>Username:</b> ${username || 'No Username :('}<br>
       <b>Callsign:</b> ${callsign}<br>
       <b>Altitude:</b> ${roundedAltitude} feet<br>
       <b>Speed:</b> ${roundedSpeed} knots
     `;
-
     L.popup()
       .setLatLng(latlng)
       .setContent(popupContent)
       .openOn(mymap);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   function displayRoutePolyline(route) {
     const coordinates = route.map(point => [point.latitude, point.longitude]);
     routePolyline = L.polyline(coordinates, { color: 'blue' }).addTo(mymap);
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
   function changeMapStyle() {
     if (mymap.hasLayer(osmLayer)) {
@@ -214,23 +117,10 @@ document.addEventListener('DOMContentLoaded', function () {
       mymap.addLayer(osmLayer);
       buttonImage.querySelector('img').src = "static/sat.png";
     }
-
     removeExistingPolyline();
     removeFlightInfoPopup();
-    
-
     updateFlightMarkers();
   }
-
-
-
-
-
-
-
-
-
-
 
   function updateFlightMarkers() {
     flightMarkers.forEach(marker => {
@@ -244,33 +134,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-
-
-
-
-
-
-
   function getMarkerIconUrl(flightInfo) {
     const currentMapStyle = getCurrentMapStyle();
-
-    // Changer d'icone quand on est en vue satellite sinon on ne voit pas les icones bleus, c'est dommage :/
     if (currentMapStyle === 'satellite') {
       return "static/orangeplane.png";
     } else {
       return "static/plane.png";
     }
   }
-
-
-
-
-
-
-
-
-
-
 
   function getCurrentMapStyle() {
     if (mymap.hasLayer(osmLayer)) {
@@ -280,15 +151,8 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (mymap.hasLayer(darkLayer)) {
       return 'dark';
     }
-    // Si les autres styles sont indisponibles, ca revert a OSM
     return 'osm';
   }
-
-
-
-
-
-
 
   function zoomToLocation(e) {
     const latlng = e.geocode.center;
@@ -296,25 +160,13 @@ document.addEventListener('DOMContentLoaded', function () {
       animate: true,
       duration: 1,
     });
-
-    // Pour enlever le popup et le polyline actif
     removeExistingPolyline();
     removeFlightInfoPopup();
   }
 
-
-
-
-
-
-
-
-
   function createFlightMarker(flight) {
-    // pour créer les markers
     const { latitude, longitude, track, username, callsign, altitude, speed } = flight;
     const iconUrl = getMarkerIconUrl(flight);
-    
     const marker = L.marker([latitude, longitude], {
       icon: L.divIcon({
         className: 'custom-marker',
@@ -323,53 +175,26 @@ document.addEventListener('DOMContentLoaded', function () {
         html: `<img src="${iconUrl}" style="width: 100%; height: 100%; transform: rotate(${track}deg);">`
       }),
     }).on('click', onMarkerClick);
-
     marker.flightId = flight.flightId;
     marker.flightInfo = { username, callsign, altitude, speed, track };
     marker.addTo(mymap);
     flightMarkers.push(marker);
   }
 
-
-
-
-
-
-
-
-
-
-
-
   function addFlightMarkers(flights) {
-    // Tout enlever dans le popup et le polyline
     flightMarkers.forEach(marker => marker.remove());
     flightMarkers = [];
     removeExistingPolyline();
     removeFlightInfoPopup();
-
     flights.forEach(flight => {
       createFlightMarker(flight);
     });
   }
 
-
-
-
-
-
-
-
-
-
-
-
   async function fetchFlights() {
-    // Fetch flight info
     const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
     const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
     const apiUrl = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights?apikey=${apiKey}`;
-
     try {
       const response = await fetch(apiUrl);
       const data = await response.json();
@@ -380,33 +205,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-
-
-
-
-
-
-
   function clearRouteOnMapClick() {
-    // Remove polyline and popup when I click on map
     removeExistingPolyline();
     removeFlightInfoPopup();
   }
 
-
-
-
-
-
-
-
-
   document.getElementById('changeMapBtn').addEventListener('click', changeMapStyle);
-  document.getElementById('refreshButton').addEventListener('click', fetchFlights);
 
   geocoder.on('markgeocode', zoomToLocation);
 
   mymap.on('click', clearRouteOnMapClick);
 
+  // Initial call to fetch flights
   fetchFlights();
+
+  // Refresh flights every 3 seconds
+  setInterval(fetchFlights, 3000);
 });
+
