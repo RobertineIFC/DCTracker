@@ -3,12 +3,24 @@ body {
     padding: 0;
 }
 
-#map {
-    background-color: #0d0232;
+.container {
+    display: flex;
     height: 100vh;
 }
 
+#map {
+    background-color: #0d0232;
+    height: 100%;
+    width: 68vw;
+}
 
+#text-section {
+    width: 32vw;
+    background-color: #f0f0f0;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto; /* Add scroll if content exceeds height */
+}
 
 #changeMapBtn {
     position: absolute;
@@ -23,46 +35,6 @@ body {
     cursor: pointer;
 }
 
-
-
-
-
-
 #changeMapBtn img {
     border-radius: 20%;
-}
-
-
-
-
-
-
-
-
-
-
-
-#refreshButton {
-    position: absolute;
-    top: 190px;
-    left: 10px;
-    z-index: 1000;
-    border: none;
-    padding: 0%;
-    width: 70px;
-    height: 35px;
-    border-radius: 20%;
-    cursor: pointer;
-    background-color: rgb(12, 0, 60);
-    color: white;
-}
-
-#refreshButton:hover {
-    background-color: rgb(18, 0, 91);
-}
-
-#refreshButton:active {
-    background-color: rgb(21, 0, 104);
-    width: 69px;
-    height: 34px;
 }
