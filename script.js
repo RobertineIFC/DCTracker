@@ -191,11 +191,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  async function fetchFlights() {
-    const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
-    const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
-    const apiUrl = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights?apikey=${apiKey}`;
+  async function fetchFlightsAndRefreshMap() {
     try {
+      const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
+      const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
+      const apiUrl = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights?apikey=${apiKey}`;
       const response = await fetch(apiUrl);
       const data = await response.json();
       const flights = data.result;
@@ -216,10 +216,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   mymap.on('click', clearRouteOnMapClick);
 
-  // Initial call to fetch flights
-  fetchFlights();
+  // Initial call to fetch flights and refresh map
+  fetchFlightsAndRefreshMap();
 
-  // Refresh flights every 3 seconds
-  setInterval(fetchFlights, 3000);
+  // Refresh flights and map every 3 seconds
+  setInterval(fetchFlightsAndRefreshMap, 3000);
 });
+
 
