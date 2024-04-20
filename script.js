@@ -225,14 +225,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const gpxData = generateGPX(route);
             const blob = new Blob([gpxData], { type: 'application/gpx+xml' });
             const link = document.createElement('a');
+            const shortenedLastReport = flightInfo.lastReport.slice(0, 10);
             link.href = window.URL.createObjectURL(blob);
-            link.download = 'flight_route.gpx';
+            link.download = flightInfo.username + '_' + shortenedLastReport + '.gpx';
             link.click();
         } else {
             console.error('Error downloading GPX: Route data is missing.');
         }
     }
-
+    
     function generateGPX(route, username, date) {
         let gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
     <gpx version="1.1" creator="Your Application Name" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
@@ -258,49 +259,55 @@ document.addEventListener('DOMContentLoaded', function () {
         return gpxContent;
     }
 
+
     async function downloadKML(flightInfo) {
         const flightId = flightInfo.flightId;
         const route = await fetchFlightRoute(flightId);
         if (route) {
-            const kmlData = generateKML(route);
+            const currentDate = new Date().toISOString();
+            const kmlData = generateKML(route, flightInfo.username, currentDate);
             const blob = new Blob([kmlData], { type: 'application/vnd.google-earth.kml+xml' });
             const link = document.createElement('a');
+            const shortenedLastReport = flightInfo.lastReport.slice(0, 10);
             link.href = window.URL.createObjectURL(blob);
-            link.download = 'flight_route.kml';
+            link.download = flightInfo.username + '_' + shortenedLastReport + '.kml';
             link.click();
         } else {
             console.error('Error downloading KML: Route data is missing.');
         }
     }
+    
+    
 
     function generateKML(route, username, date) {
         let kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-    <kml xmlns="http://www.opengis.net/kml/2.2">
-      <Document>
-        <name>${username} - ${date}</name>
-        <description>Flight Route KML</description>
-        <Style id="line-ffa500-240-nodesc-normal">
-          <LineStyle>
-            <color>ff00a5ff</color>
-            <width>2</width>
-          </LineStyle>
-        </Style>
-        <Placemark>
-          <styleUrl>#line-ffa500-240-nodesc-normal</styleUrl>
-          <LineString>
-            <altitudeMode>relativeToGround</altitudeMode>
-            <coordinates>
-    `;
+        <kml xmlns="http://www.opengis.net/kml/2.2">
+          <Document>
+            <name>${username} - ${date}</name>
+            <description>Flight Route KML</description>
+            <Style id="line-ffa500-240-nodesc-normal">
+              <LineStyle>
+                <color>ff00a5ff</color>
+                <width>2</width>
+              </LineStyle>
+            </Style>
+            <Placemark>
+              <styleUrl>#line-ffa500-240-nodesc-normal</styleUrl>
+              <LineString>
+                <altitudeMode>absolute</altitudeMode>
+                <coordinates>
+        `;
         route.forEach(point => {
             kmlContent += `          ${point.longitude},${point.latitude},${point.altitude}\n`;
         });
         kmlContent += `        </coordinates>
-          </LineString>
-        </Placemark>
-      </Document>
-    </kml>`;
+              </LineString>
+            </Placemark>
+          </Document>
+        </kml>`;
         return kmlContent;
     }
+    
     
     
     
