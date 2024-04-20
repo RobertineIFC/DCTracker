@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (planeType === 'ef677903-f8d3-414f-a190-233b2b855d46') {
             console.log("Using C172.png for specific aircraft ID");
-            return "static/c172.png";
+            return "static/C172.png";
         } else if (planeType === 'f11ed126-bce8-46ef-9265-69191c354575') {
             console.log("Using A380.png for specific aircraft ID");
             return "static/A380.png";
