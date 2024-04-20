@@ -32,21 +32,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function onMarkerClick(e) {
         const flightId = e.target.flightId;
-    
         removeExistingPolyline();
         removeFlightInfoInTextSection();
-    
         const flightInfo = await fetchFlightInfo(flightId);
-    
         if (flightInfo) {
             showFlightInfoInTextSection(flightInfo);
             const route = await fetchFlightRoute(flightId);
-    
             if (route) {
                 displayRoutePolyline(route, e.latlng);
             }
         }
     }
+
     
     async function removeExistingPolyline() {
         if (routePolyline) {
@@ -201,7 +198,114 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         
         textSection.innerHTML = flightInfoContent;
+
+        // Add download GPX button
+        const downloadGPXButton = document.createElement('button');
+        downloadGPXButton.textContent = 'Download GPX';
+        downloadGPXButton.classList.add('btnStyle');
+        downloadGPXButton.addEventListener('click', () => {
+            downloadGPX(flightInfo);
+        });
+        textSection.appendChild(downloadGPXButton);
+
+        // Add download KML button
+        const downloadKMLButton = document.createElement('button');
+        downloadKMLButton.textContent = 'Download KML';
+        downloadKMLButton.classList.add('btnStyle');
+        downloadKMLButton.addEventListener('click', () => {
+            downloadKML(flightInfo);
+        });
+        textSection.appendChild(downloadKMLButton);
     }
+
+    async function downloadGPX(flightInfo) {
+        const flightId = flightInfo.flightId;
+        const route = await fetchFlightRoute(flightId);
+        if (route) {
+            const gpxData = generateGPX(route);
+            const blob = new Blob([gpxData], { type: 'application/gpx+xml' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'flight_route.gpx';
+            link.click();
+        } else {
+            console.error('Error downloading GPX: Route data is missing.');
+        }
+    }
+
+    function generateGPX(route, username, date) {
+        let gpxContent = `<?xml version="1.0" encoding="UTF-8"?>
+    <gpx version="1.1" creator="Your Application Name" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+      <metadata>
+        <name>${username} - ${date}</name>
+        <desc>Flight Route GPX</desc>
+      </metadata>
+      <trk>
+        <name>${username} - ${date}</name>
+        <desc>Flight Route GPX</desc>
+        <trkseg>
+    `;
+        route.forEach(point => {
+            gpxContent += `      <trkpt lat="${point.latitude}" lon="${point.longitude}">
+            <ele>${point.altitude}</ele>
+            <time>${point.date}</time>
+          </trkpt>
+    `;
+        });
+        gpxContent += `    </trkseg>
+      </trk>
+    </gpx>`;
+        return gpxContent;
+    }
+
+    async function downloadKML(flightInfo) {
+        const flightId = flightInfo.flightId;
+        const route = await fetchFlightRoute(flightId);
+        if (route) {
+            const kmlData = generateKML(route);
+            const blob = new Blob([kmlData], { type: 'application/vnd.google-earth.kml+xml' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'flight_route.kml';
+            link.click();
+        } else {
+            console.error('Error downloading KML: Route data is missing.');
+        }
+    }
+
+    function generateKML(route, username, date) {
+        let kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+    <kml xmlns="http://www.opengis.net/kml/2.2">
+      <Document>
+        <name>${username} - ${date}</name>
+        <description>Flight Route KML</description>
+        <Style id="line-ffa500-240-nodesc-normal">
+          <LineStyle>
+            <color>ff00a5ff</color>
+            <width>2</width>
+          </LineStyle>
+        </Style>
+        <Placemark>
+          <styleUrl>#line-ffa500-240-nodesc-normal</styleUrl>
+          <LineString>
+            <altitudeMode>relativeToGround</altitudeMode>
+            <coordinates>
+    `;
+        route.forEach(point => {
+            kmlContent += `          ${point.longitude},${point.latitude},${point.altitude}\n`;
+        });
+        kmlContent += `        </coordinates>
+          </LineString>
+        </Placemark>
+      </Document>
+    </kml>`;
+        return kmlContent;
+    }
+    
+    
+    
+    
+
     
     
     
@@ -254,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
     
         if (planeType === 'ef677903-f8d3-414f-a190-233b2b855d46') {
             console.log("Using C172.png for specific aircraft ID");
-            return "static/C172.png";
+            return "static/c172.png";
         } else if (planeType === 'f11ed126-bce8-46ef-9265-69191c354575') {
             console.log("Using A380.png for specific aircraft ID");
             return "static/A380.png";
