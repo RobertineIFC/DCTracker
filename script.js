@@ -199,7 +199,6 @@ document.addEventListener('DOMContentLoaded', function () {
         
         textSection.innerHTML = flightInfoContent;
 
-        // Add download GPX button
         const downloadGPXButton = document.createElement('button');
         downloadGPXButton.textContent = 'Download GPX';
         downloadGPXButton.classList.add('btnStyle');
@@ -208,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         textSection.appendChild(downloadGPXButton);
 
-        // Add download KML button
+
         const downloadKMLButton = document.createElement('button');
         downloadKMLButton.textContent = 'Download KML';
         downloadKMLButton.classList.add('btnStyle');
@@ -294,6 +293,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <Placemark>
               <styleUrl>#line-ffa500-240-nodesc-normal</styleUrl>
               <LineString>
+                <extrude>1</extrude>
+                <tessellate>1</tessellate>
                 <altitudeMode>absolute</altitudeMode>
                 <coordinates>
         `;
