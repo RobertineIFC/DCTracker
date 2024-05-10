@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <coordinates>
         `;
         route.forEach(point => {
-            kmlContent += `          ${point.longitude},${point.latitude},${point.altitude}\n`;
+            kmlContent += `          ${point.longitude},${point.latitude},${point.altitude/3.28084}\n`;
         });
         kmlContent += `        </coordinates>
               </LineString>
