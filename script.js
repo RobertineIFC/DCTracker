@@ -364,13 +364,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const { username } = flightInfo;
         const planeType = flightInfo.aircraftId;
     
-        if (planeType === 'ef677903-f8d3-414f-a190-233b2b855d46') {
+        if (planeType === '206884f9-38a8-4118-a920-a7dcbd166c47') {
             console.log("Using C172.png for specific aircraft ID");
             return "static/C172.png";
         } else if (planeType === 'f11ed126-bce8-46ef-9265-69191c354575') {
             console.log("Using A380.png for specific aircraft ID");
             return "static/A380.png";
-        } else if (planeType === '206884f9-38a8-4118-a920-a7dcbd166c47') {
+        } else if (planeType === 'ef677903-f8d3-414f-a190-233b2b855d46') {
             console.log("Using C172.png for specific aircraft ID");
             return "static/C172.png";
         } else if (planeType === 'c82da702-ea61-4399-921c-34f35f3ca5c4' || planeType === 'de510d3d-04f8-46e0-8d65-55b888f33129' || planeType === '9759c19f-8f18-40f5-80d1-03a272f98a3b') {
