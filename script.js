@@ -17,6 +17,31 @@ document.addEventListener('DOMContentLoaded', function () {
         noWrap: true
     }).addTo(mymap);
 
+    // OpenWeatherMap API key
+    var apiKeyweather = '55915385cd68325e3e3b68dcd1fd80f7';
+
+    // Function to create OpenWeatherMap layer
+    function createLayer(layerType) {
+        return L.tileLayer(`https://tile.openweathermap.org/map/${layerType}/{z}/{x}/{y}.png?appid=${apiKeyweather}`, {
+            opacity: 1,
+            maxZoom: 19,
+        });
+    }
+
+    // Initialize with precipitation layer
+    var currentLayer = createLayer('precipitation_new');
+    currentLayer.addTo(mymap);
+
+    // Handle layer selection change
+    document.getElementById('layerSelect').addEventListener('change', function(e) {
+        var selectedLayer = e.target.value;
+        if (currentLayer) {
+            mymap.removeLayer(currentLayer);
+        }
+        currentLayer = createLayer(selectedLayer);
+        currentLayer.addTo(mymap);
+    });
+
     const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png');
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
     const buttonImage = document.getElementById("changeMapBtn");
