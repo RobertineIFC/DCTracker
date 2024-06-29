@@ -1,3 +1,30 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Show warning popup for mobile users
+    if (window.innerWidth <= 768) {
+        var warningPopup = document.getElementById('warningPopup');
+        var warningContent = document.getElementById('warningContent');
+        warningPopup.style.display = 'block';
+
+        var countdown = 3;
+        var timer = setInterval(function() {
+            countdown--;
+            if (countdown >= 0) {
+                warningContent.textContent = 'This page is optimized for desktop.  This message will disappear in ' + countdown + '...';
+            } else {
+                clearInterval(timer);
+                warningPopup.style.opacity = '0';
+                setTimeout(function() {
+                    warningPopup.style.display = 'none';
+                }, 1000);
+            }
+        }, 1000);
+    }
+});
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
     var maxBounds = [
         [-90, -180],
@@ -17,10 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
         noWrap: true
     }).addTo(mymap);
 
-    // OpenWeatherMap API key
+
     var apiKeyweather = '55915385cd68325e3e3b68dcd1fd80f7';
 
-    // Function to create OpenWeatherMap layer
+
     function createLayer(layerType) {
         return L.tileLayer(`https://tile.openweathermap.org/map/${layerType}/{z}/{x}/{y}.png?appid=${apiKeyweather}`, {
             opacity: 1,
@@ -28,11 +55,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Initialize with precipitation layer
     var currentLayer = createLayer('precipitation_new');
     currentLayer.addTo(mymap);
 
-    // Handle layer selection change
     document.getElementById('layerSelect').addEventListener('change', function(e) {
         var selectedLayer = e.target.value;
         if (currentLayer) {
@@ -91,11 +116,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
         const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
         const flightApiUrl = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}?apikey=${apiKey}`;
-
+    
         try {
             const response = await fetch(flightApiUrl);
             const data = await response.json();
-
+    
             if (data.errorCode === 0) {
                 return data.result;
             } else {
@@ -125,6 +150,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (error) {
             console.error('Error fetching flight route:', error);
+            return null;
+        }
+    }
+
+    async function fetchFlightPlan(flightId) {
+        const apiKey = '16g9z0yzub3dszefdibss5455tytdhkr';
+        const sessionId = 'df2a8d19-3a54-4ce5-ae65-0b722186e44c';
+        const flightPlanApiURL = `https://api.infiniteflight.com/public/v2/sessions/${sessionId}/flights/${flightId}/flightplan?apikey=${apiKey}`;
+    
+        try {
+            const response = await fetch(flightPlanApiURL);
+            const data = await response.json();
+    
+            if (data.errorCode === 0) {
+                return data.result;
+            } else {
+                console.error('Error Fetching Flight Plan, Sorry...', data);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching flight plan:', error);
             return null;
         }
     }
@@ -193,16 +239,14 @@ document.addEventListener('DOMContentLoaded', function () {
         '3f17ca35-b384-4391-aa5e-5beececb0612': 'TBM-930'
     };
     
-    
-
-    function showFlightInfoInTextSection(flightInfo) {
-        const { username, callsign, altitude, speed, aircraftId } = flightInfo;
+    async function showFlightInfoInTextSection(flightInfo) {
+        const { username, callsign, altitude, speed, aircraftId, flightId } = flightInfo;
         const roundedAltitude = Math.round(altitude);
         const roundedSpeed = Math.round(speed);
         const aircraftType = aircraftTypes[aircraftId] || 'Unknown';
-        
+    
         const textSection = document.getElementById('text-section');
-        
+    
         let flightStatus = '';
         let flightStatusColor = '';
         if (speed < 40) {
@@ -212,7 +256,19 @@ document.addEventListener('DOMContentLoaded', function () {
             flightStatus = 'In Flight';
             flightStatusColor = 'hsl(120, 100%, 50%)';
         }
-        
+    
+        const flightPlan = await fetchFlightPlan(flightId);
+        let waypointsInfo = '<p><b>Route:</b> ';
+        if (flightPlan && flightPlan.waypoints) {
+            if (flightPlan.waypoints.length > 1) {
+                waypointsInfo += `<span style="color: orange;">${flightPlan.waypoints[0]} &rarr; ${flightPlan.waypoints[flightPlan.waypoints.length - 1]}</span></p>`;
+            } else {
+                waypointsInfo += `<span style="color: orange;">${flightPlan.waypoints[0]}</span></p>`;
+            }
+        } else {
+            waypointsInfo += 'No flight plan available.</p>';
+        }
+    
         const flightInfoContent = `
             <h2>Flight Information</h2>
             <p><b>Username:</b> ${username || 'No Username :('}</p>
@@ -221,10 +277,11 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><b>Altitude:</b> <span>${roundedAltitude} feet</span></p>
             <p><b>Speed:</b> ${roundedSpeed} knots</p>
             <p><b>Flight Status:</b> <span style="color: ${flightStatusColor};">${flightStatus}</span></p>
+            ${waypointsInfo}
         `;
-        
+    
         textSection.innerHTML = flightInfoContent;
-
+    
         const downloadGPXButton = document.createElement('button');
         downloadGPXButton.textContent = 'Download GPX';
         downloadGPXButton.classList.add('btnStyle');
@@ -232,8 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
             downloadGPX(flightInfo);
         });
         textSection.appendChild(downloadGPXButton);
-
-
+    
         const downloadKMLButton = document.createElement('button');
         downloadKMLButton.textContent = 'Download KML';
         downloadKMLButton.classList.add('btnStyle');
@@ -242,6 +298,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         textSection.appendChild(downloadKMLButton);
     }
+    
+    
 
     async function downloadGPX(flightInfo) {
         const flightId = flightInfo.flightId;
@@ -335,15 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return kmlContent;
     }
     
-    
-    
-    
-    
 
-    
-    
-    
-    
     
 
     function displayRoutePolyline(route, clickedMarkerLatLng) {
@@ -356,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const lastPointIndex = coordinates.length - 1;
         const routeCoordinates = coordinates.slice(0, lastPointIndex);
 
-        routePolyline = L.polyline(routeCoordinates, { color: 'blue' }).addTo(mymap);
+        routePolyline = L.polyline(routeCoordinates, { color: 'green' }).addTo(mymap);
 
         const lastPoint = [clickedMarkerLatLng.lat, clickedMarkerLatLng.lng];
         routePolyline.addLatLng(lastPoint);
